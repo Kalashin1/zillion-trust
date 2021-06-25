@@ -1,36 +1,42 @@
 <?php
-require_once('../helper/conn.php');
+  require_once('../helper/conn.php');
  require_once('../components/header.php');
  require_once('../helper/user.php');
-  
+  // Create an empty errors array to store errors for each form field
  $errors = [];
 
  if(isset($_POST['submit'])) {
-  if(isset($_POST['first_name'])) {
+  // print_r($_FILES);
+  // print_r($_POST);
+  $file_name=$_FILES["img"]["name"];
+  $tmp_name=$_FILES["img"]["tmp_name"];
+  move_uploaded_file($tmp_name, "upload/".$file_name);
+
+  if(!empty($_POST['first_name'])) {
     $first_name = htmlspecialchars(trim($_POST['first_name']));
   } else {
     $errors['first_name'] = 'Please enter your first name field cannot be blank';
   }
 
-  if (isset($_POST['middle_name'])) {
+  if (!empty($_POST['middle_name'])) {
     $middle_name = htmlspecialchars(trim($_POST['middle_name']));
   } else {
     $errors['middle_name'] = 'Please enter your middle name, field cannot be blank';
   }
    
-  if (isset($_POST['last_name'])) {
+  if (!empty($_POST['last_name'])) {
     $last_name = htmlspecialchars(trim($_POST['last_name']));
   } else {
     $errors['last_name'] = 'Please enter your last name, field cannot be blank';
   }
 
-   if(isset($_POST['email'])) {
+   if(!empty($_POST['email'])) {
     $email = htmlspecialchars(trim($_POST['email']));
   } else {
     $errors['mail'] = 'Please enter your last name, field cannot be blank';
   }
 
-  if(isset($_POST['password'])) {
+  if(!empty($_POST['password'])) {
     // check if the password and password2 matches then use a regex to test the password strength
     $password = $_POST['password'];
     $password_2 = $_POST['password_2'];
@@ -43,13 +49,13 @@ require_once('../helper/conn.php');
      $errors['password'] = 'Please enter password and confirm password, fields cannot be blank';
   }
 
-  if (isset($_POST['phone'])) {
+  if (!empty($_POST['phone'])) {
     $phone = htmlspecialchars(trim($_POST['phone']));
   } else {
      $errors['phone'] = 'Please enter phone number, field cannot be blank';
   }
 
-  if (isset($_POST['username'])) {
+  if (!empty($_POST['username'])) {
     // query the database for a username
     $username = htmlspecialchars(trim($_POST['phone']));
   } else {
@@ -61,32 +67,32 @@ require_once('../helper/conn.php');
   // Generate an account number for them
   $acct_no = uniqid('');
 
-  if (isset($_POST['acct_type'])) {
+  if (!empty($_POST['acct_type'])) {
     $acct_type = htmlspecialchars(trim($_POST['acct_type']));
   } else {
      $errors['acct_type'] = 'Please select your account type, field cannot be blank';
   }
 
-  if (isset($_POST['sex'])) {
+  if (!empty($_POST['sex'])) {
     // query the database for a username
     $sex = htmlspecialchars(trim($_POST['sex']));
   } else {
      $errors['sex'] = 'Please enter your sex, field cannot be blank';
   }
 
-  if (isset($_POST['dob'])) {
+  if (!empty($_POST['dob'])) {
     $dob = htmlspecialchars(trim($_POST['dob']));
   } else {
      $errors['dob'] = 'Please enter your date of birth, field cannot be blank';
   }
 
-   if (isset($_POST['marital_status'])) {
+   if (!empty($_POST['marital_status'])) {
     $marital_status = htmlspecialchars(trim($_POST['marital_status']));
   } else {
      $errors['marital_status'] = 'Please select your marital status, field cannot be blank';
   }
 
-   if (isset($_POST['currency'])) {
+   if (!empty($_POST['currency'])) {
     $currency = htmlspecialchars(trim($_POST['currency']));
   } else {
      $errors['currency'] = 'Please select your currency, field cannot be blank';
@@ -95,69 +101,69 @@ require_once('../helper/conn.php');
   $acct_status = 'INACTIVE/DORMANT';
   $reg_date = date("Y-m-d");
 
-  if (isset($_POST['cot'])) {
+  if (!empty($_POST['cot'])) {
     $cot = htmlspecialchars(trim($_POST['cot']));
   } else {
      $errors['cot'] = 'Please enter your cot, field cannot be blank';
   }
 
-  if (isset($_POST['tax'])) {
+  if (!empty($_POST['tax'])) {
     $tax = htmlspecialchars(trim($_POST['tax']));
   } else {
      $errors['tax'] = 'Please enter your tax, field cannot be blank';
   }
 
-  if (isset($_POST['imf'])) {
+  if (!empty($_POST['imf'])) {
     $imf = htmlspecialchars(trim($_POST['imf']));
   } else {
      $errors['imf'] = 'Please your imf, field cannot be blank';
   }
 
-  if (isset($_POST['pin_auth'])) {
+  if (!empty($_POST['pin_auth'])) {
     $pin_auth = htmlspecialchars(trim($_POST['pin_auth']));
   } else {
      $errors['pin_auth'] = 'Please enter your pin_auth, field cannot be blank';
   }
 
-  if (isset($_POST['pin'])) {
+  if (!empty($_POST['pin'])) {
     $pin = htmlspecialchars(trim($_POST['pin']));
   } else {
      $errors['pin'] = 'Please enter your pin, field cannot be blank';
   }
 
-  if (isset($_POST['currency'])) {
+  if (!empty($_POST['currency'])) {
     $currency = htmlspecialchars(trim($_POST['currency']));
   } else {
      $errors['currency'] = 'Please select your currency, field cannot be blank';
   }
 
-  if (isset($_POST['country'])) {
+  if (!empty($_POST['country'])) {
     $country = htmlspecialchars(trim($_POST['country']));
   } else {
      $errors['country'] = 'Please select your country, field cannot be blank';
   }
 
-  if (isset($_POST['state'])) {
+  if (!empty($_POST['state'])) {
     $state = htmlspecialchars(trim($_POST['state']));
   } else {
      $errors['state'] = 'Please enter your state, field cannot be blank';
   }
 
-  if (isset($_POST['city'])) {
+  if (!empty($_POST['city'])) {
     $city = htmlspecialchars(trim($_POST['city']));
   } else {
      $errors['city'] = 'Please enter your city, field cannot be blank';
   }
 
   
-  if (isset($_POST['zip'])) {
+  if (!empty($_POST['zip'])) {
     $zip = htmlspecialchars(trim($_POST['zip']));
   } else {
      $errors['zip'] = 'Please select your zip, field cannot be blank';
   }
 
   
-  if (isset($_POST['street'])) {
+  if (!empty($_POST['street'])) {
     $street = htmlspecialchars(trim($_POST['street']));
   } else {
      $errors['street'] = 'Please select your street, field cannot be blank';
@@ -173,9 +179,7 @@ require_once('../helper/conn.php');
     print_r($errors);
   } else {
     // the values used to create this user is provided by the creatUser function
-    $user = signup($uid, $first_name, $last_name, $middle_name, $email, $password, $phone, $username, $acct_no, $acct_type, $sex, $dob, $reg_date, $marital_status, $acct_status, $currency, $profile_pic, $country, $state, $city, $zip, $street, $book, $avail, $loan, $uncleared, $fixed, $limit, $cot, $tax, $imf, $pin_auth, $pin, $conn);
-
-    print_r($user);
+    signup($uid, $first_name, $last_name, $middle_name, $email, $password, $phone, $username, $acct_no, $acct_type, $sex, $dob, $reg_date, $marital_status, $acct_status, $currency, $profile_pic, $country, $state, $city, $zip, $street, $book, $avail, $loan, $uncleared, $fixed, $limit, $cot, $tax, $imf, $pin_auth, $pin, $file_name, $conn);
   }
 
 }
@@ -190,10 +194,10 @@ require_once('../helper/conn.php');
   <div class="row m-0">
     <div class="col-12 p-0">    
       <div class="login-card">
-        <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST" enctype="form/multipart">
+        <div>
           <div><a class="logo" href="index.html"><img class="img-fluid for-light" src="../assets/images/logo/login.png" alt="looginpage"><img class="img-fluid for-dark" src="../assets/images/logo/logo_dark.png" alt="looginpage"></a></div>
           <div class="login-main"> 
-            <form class="theme-form">
+            <form action="<?php echo $_SERVER['PHP_SELF']?>" method="POST" enctype="multipart/form-data">
               <h4>Create your account</h4>
               <p>Enter your personal details to create account</p>
               <div class="form-group">
@@ -344,12 +348,18 @@ require_once('../helper/conn.php');
                   </div>
                 </div>
               </div>
-              <div class="form-group">
+              <!-- <div class="form-group">
                 <label class="col-form-label" cursorshover="true">Upload Profile Pic</label>
                   <input class="form-control" type="file"
-                  name="profile_pic" 
-                  data-bs-original-title="" title="" cursorshover="true">
-              </div>
+                  name="img" 
+                 cursorshover="true" />
+              </div> -->
+              <div">
+							<div class="form-group">
+								 <label >Select Passport Picture:</label>
+								<input type="file" name="img">
+							</div>
+						</div>
               <div class="form-group mb-0">
                 <div class="checkbox p-0">
                   <input id="checkbox1" type="checkbox">
@@ -360,7 +370,7 @@ require_once('../helper/conn.php');
               <p class="mt-4 mb-0">Already have an account?<a class="ms-2" href="login">Sign in</a></p>
             </form>
           </div>
-        </form>
+        </div>
       </div>
     </div>
 </div>
