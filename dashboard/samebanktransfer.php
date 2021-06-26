@@ -1,7 +1,9 @@
 <?php 
-session_start();
+require_once('../helper/conn.php');
+require('../helper/user.php');
 if(isset($_SESSION['user'])){
-  $user = $_SESSION['user'];
+  $user = $user = getUser($_SESSION['user']['uid'], $conn);
+  $uid = $user['uid'];
   $acct_type = $user['acct_type'];
   $profile_pic = $user['profile_pic'];
   $acct_no = $user['acct_no'];
@@ -26,6 +28,58 @@ if(isset($_SESSION['user'])){
   $street = $user['street'];
   $dob = $user['dob'];
   $reg_date = $user['reg_date'];
+
+  if(isset($_POST['submit'])) {
+    $errors = [];
+    if(!empty($_POST['bef_name'])) {
+      $bef_name = htmlspecialchars($_POST['bef_name']);
+    } else {
+      $errors['bef_name'] = "Please provide the name of your beneficiary";
+    }
+
+    if(!empty($_POST['bef_email'])) {
+      $bef_email = htmlspecialchars($_POST['bef_email']);
+    } else {
+      $errors['bef_email'] = "Please provide the email of your beneficiary";
+    }
+
+    if(!empty($_POST['bef_acct_no'])) {
+      $bef_acct_no = htmlspecialchars($_POST['bef_acct_no']);
+    } else {
+      $errors['bef_acct_no'] = "Please provide the account number of your beneficiary";
+    }
+
+    if(!empty($_POST['bef_acct_type'])) {
+      $bef_acct_type = htmlspecialchars($_POST['bef_acct_type']);
+    } else {
+      $errors['bef_acct_type'] = "Please select the account type for your beneficiary";
+    }
+
+    if(!empty($_POST['bef_phone'])) {
+      $bef_phone = htmlspecialchars($_POST['bef_phone']);
+    } else {
+      $errors['bef_phone'] = "Please provide the phone number of your beneficiary";
+    }
+
+    if(!empty($_POST['amount'])) {
+      $amount = htmlspecialchars($_POST['amount']);
+    } else {
+      $errors['amount'] = "Please provide the amount for your transaction";
+    }
+
+
+    if(!empty($_POST['remark'])) {
+      $remark = htmlspecialchars($_POST['remark']);
+    } else {
+      $remark = "";
+    }
+
+    if(empty($errors)) {
+      // echo "$bef_name, $bef_phone, $bef_email, $bef_acct_type, $bef_acct_no, $amount, $remark, $book, $available, $limit";
+      $record = transfer($uid, $bef_acct_no, $bef_acct_type, $bef_name, $bef_email, $bef_phone, $amount, $remark, $conn, $available, $limit );
+      echo "<script>alert('transaction successful!')</script>";
+    } 
+  }
 
 } else {
   header('Location: ../user/login.php');
@@ -88,8 +142,7 @@ require_once('../components/header.php');
     <!-- page-wrapper Start-->
     <div class="page-wrapper compact-wrapper" id="pageWrapper">
 		<!-- Page Header Start-->
-		
-		 <?php include '../components/navbar.php';?>
+		<?php include '../components/navbar.php';?> 
 <!---->
       <!-- Page Header Ends -->
 		
@@ -99,7 +152,7 @@ require_once('../components/header.php');
 		  
 		  
         <!-- Page Sidebar Start-->
-      <?php include '../components/sidebar.php';?>
+       <?php include '../components/sidebar.php';?> 
 		  
         <!-- Page Sidebar Ends-->
 		  
@@ -139,46 +192,58 @@ require_once('../components/header.php');
           
           
                 <div class="col-xl-8">
-                  <form class="card">
+                  <form class="card" action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST">
                     <div class="card-header">
                       <h4 class="card-title mb-0">Provide Details of Beneficiary Below</h4>
                       <div class="card-options"><a class="card-options-collapse" href="#" data-bs-toggle="card-collapse"><i class="fe fe-chevron-up"></i></a><a class="card-options-remove" href="#" data-bs-toggle="card-remove"><i class="fe fe-x"></i></a></div>
                     </div>
                     <div class="card-body">
                       <div class="row">
+                        <div class="col-sm-6 col-md-6">
+                            <div class="mb-3">
+                              <label class="form-label">Enter Beneficiary Name</label>
+                              <input class="form-control" required name="bef_name" type="text" placeholder="Enter Beneficiary name">
+                            </div>
+                          </div>
+
+                          <div class="col-sm-6 col-md-6">
+                            <div class="mb-3">
+                              <label class="form-label">Enter Beneficiary Email</label>
+                              <input class="form-control" required name="bef_email" type="email" placeholder="email@gmail.com">
+                            </div>
+                          </div>
                         <div class="col-sm-6 col-md-7">
                           <div class="mb-3">
                             <label class="form-label">Beneficiary Acct Number</label>
-                            <input class="form-control" name="bef_acct_no" type="text" placeholder="00044">
+                            <input class="form-control" required name="bef_acct_no" type="text" placeholder="00044">
                           </div>
                         </div>
                         <div class="col-md-5">
                           <div class="mb-3">
                             <label class="form-label">Account Type</label>
-                            <select class="form-control btn-square">
+                            <select class="form-control btn-square" required name="bef_acct_type">
                               <option value="savings">Savings</option>
                               <option value="current">Current</option>
                               <option value="fixed_deposit">fixed_deposit</option>
                             </select>
                           </div>
                         </div>
-                        <div class="col-sm-6 col-md-8">
+                        <div class="col-sm-6 col-md-4">
                           <div class="mb-3">
-                            <label class="form-label">Beneficiary Name</label>
-                            <input class="form-control" name="bef_name" type="text" placeholder="Beneficiary Name">
+                            <label class="form-label">Beneficiary Phone</label>
+                            <input class="form-control" required name="bef_phone" type="text" placeholder="Beneficiary Phone number">
                           </div>
                         </div>
                         <div class="col-sm-6 col-md-4">
                           <div class="mb-3">
                             <label class="form-label">Enter Amount</label>
-                            <input class="form-control" name="amount" type="number" placeholder="000">
+                            <input class="form-control" required name="amount" type="number" placeholder="000">
                           </div>
                         </div>
-
                         <div class="col-md-12">
                           <div>
                             <label class="form-label">Remark</label>
-                            <textarea class="form-control" name="remark" rows="5" placeholder="Enter About your description"></textarea>
+                            <textarea class="form-control" required name="remark" rows="5" placeholder="Enter About your description"></textarea>
                           </div>
                         </div>
                       </div>
@@ -190,67 +255,6 @@ require_once('../components/header.php');
             
                   </form>
                 </div>
-               
-<!--
-        <div class="col-md-12">
-                  <div class="card">
-                    <div class="card-header">
-                      <h4 class="card-title mb-0">Add projects And Upload</h4>
-                      <div class="card-options"><a class="card-options-collapse" href="#" data-bs-toggle="card-collapse"><i class="fe fe-chevron-up"></i></a><a class="card-options-remove" href="#" data-bs-toggle="card-remove"><i class="fe fe-x"></i></a></div>
-                    </div>
-                    <div class="table-responsive add-project">
-                      <table class="table card-table table-vcenter text-nowrap">
-                        <thead>
-                          <tr>
-                            <th>Project Name</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Price</th>
-                            <th></th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td><a class="text-inherit" href="#">Untrammelled prevents </a></td>
-                            <td>28 May 2018</td>
-                            <td><span class="status-icon bg-success"></span> Completed</td>
-                            <td>$56,908</td>
-                            <td class="text-end"><a class="icon" href="javascript:void(0)"></a><a class="btn btn-primary btn-sm" href="javascript:void(0)"><i class="fa fa-pencil"></i> Edit</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-transparent btn-sm" href="javascript:void(0)"><i class="fa fa-link"></i> Update</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-danger btn-sm" href="javascript:void(0)"><i class="fa fa-trash"></i> Delete</a></td>
-                          </tr>
-                          <tr>
-                            <td><a class="text-inherit" href="#">Untrammelled prevents</a></td>
-                            <td>12 June 2018</td>
-                            <td><span class="status-icon bg-danger"></span> On going</td>
-                            <td>$45,087</td>
-                            <td class="text-end"><a class="icon" href="javascript:void(0)"></a><a class="btn btn-primary btn-sm" href="javascript:void(0)"><i class="fa fa-pencil"></i> Edit</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-transparent btn-sm" href="javascript:void(0)"><i class="fa fa-link"></i> Update</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-danger btn-sm" href="javascript:void(0)"><i class="fa fa-trash"></i> Delete</a></td>
-                          </tr>
-                          <tr>
-                            <td><a class="text-inherit" href="#">Untrammelled prevents</a></td>
-                            <td>12 July 2018</td>
-                            <td><span class="status-icon bg-warning"></span> Pending</td>
-                            <td>$60,123</td>
-                            <td class="text-end"><a class="icon" href="javascript:void(0)"></a><a class="btn btn-primary btn-sm" href="javascript:void(0)"><i class="fa fa-pencil"></i> Edit</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-transparent btn-sm" href="javascript:void(0)"><i class="fa fa-link"></i> Update</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-danger btn-sm" href="javascript:void(0)"><i class="fa fa-trash"></i> Delete</a></td>
-                          </tr>
-                          <tr>
-                            <td><a class="text-inherit" href="#">Untrammelled prevents</a></td>
-                            <td>14 June 2018</td>
-                            <td><span class="status-icon bg-warning"></span> Pending</td>
-                            <td>$70,435</td>
-                            <td class="text-end"><a class="icon" href="javascript:void(0)"></a><a class="btn btn-primary btn-sm" href="javascript:void(0)"><i class="fa fa-pencil"></i> Edit</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-transparent btn-sm" href="javascript:void(0)"><i class="fa fa-link"></i> Update</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-danger btn-sm" href="javascript:void(0)"><i class="fa fa-trash"></i> Delete</a></td>
-                          </tr>
-                          <tr>
-                            <td><a class="text-inherit" href="#">Untrammelled prevents</a></td>
-                            <td>25 June 2018</td>
-                            <td><span class="status-icon bg-success"></span> Completed</td>
-                            <td>$15,987</td>
-                            <td class="text-end"><a class="icon" href="javascript:void(0)"></a><a class="btn btn-primary btn-sm" href="javascript:void(0)"><i class="fa fa-pencil"></i> Edit</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-transparent btn-sm" href="javascript:void(0)"><i class="fa fa-link"></i> Update</a><a class="icon" href="javascript:void(0)"></a><a class="btn btn-danger btn-sm" href="javascript:void(0)"><i class="fa fa-trash"></i> Delete</a></td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
--->
               </div>
             </div>
           </div>

@@ -1,7 +1,9 @@
 <?php 
-session_start();
+require_once('../helper/conn.php');
+require('../helper/user.php');
 if(isset($_SESSION['user'])){
-  $user = $_SESSION['user'];
+  $user = getUser($_SESSION['user']['uid'], $conn);
+  $uid = $user['uid'];
   $acct_type = $user['acct_type'];
   $profile_pic = $user['profile_pic'];
   $acct_no = $user['acct_no'];
@@ -26,6 +28,34 @@ if(isset($_SESSION['user'])){
   $street = $user['street'];
   $dob = $user['dob'];
   $reg_date = $user['reg_date'];
+
+  if(isset($_POST['submit'])) {
+    $errors = [];
+    if(!empty($_POST['type'])) {
+      $type = htmlspecialchars($_POST['type']);
+    } else {
+      $errors['type'] = "Please select the type of your card";
+    }
+
+    if(!empty($_POST['name'])) {
+      $name = htmlspecialchars($_POST['name']);
+    } else {
+      $errors['name'] = "Please provide the name that should be on your card";
+    }
+
+    if(!empty($_POST['remark'])) {
+      $remark = htmlspecialchars($_POST['remark']);
+    } else {
+      $remark = "no remark";
+    }
+
+    if(empty($errors)) {
+      // echo "$type, $remark, $name, $uid";
+      requestCard($uid, $type, $name, $remark, $conn);
+    } else {
+      print_r($errors);
+    }
+  }
 
 } else {
   header('Location: ../user/login.php');
@@ -89,7 +119,7 @@ require_once('../components/header.php');
     <div class="page-wrapper compact-wrapper" id="pageWrapper">
 		<!-- Page Header Start-->
 		
-		 <?php include '../components/navbar.php';?>
+		 <!-- <?php include '../components/navbar.php';?> -->
 <!---->
       <!-- Page Header Ends -->
 		
@@ -99,7 +129,7 @@ require_once('../components/header.php');
 		  
 		  
         <!-- Page Sidebar Start-->
-      <?php include '../components/sidebar.php';?>
+      <!-- <?php include '../components/sidebar.php';?> -->
 		  
         <!-- Page Sidebar Ends-->
 		  
@@ -138,8 +168,8 @@ require_once('../components/header.php');
           
           
           
-                <div class="col-xl-8">
-                  <form class="card">
+                <div class="col-xl-12">
+                  <form class="card" action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST">
                     <div class="card-header">
                       <h4 class="card-title mb-0">Complete The Form Below To Request A debit/credit card</h4>
                       <div class="card-options"><a class="card-options-collapse" href="#" data-bs-toggle="card-collapse"><i class="fe fe-chevron-up"></i></a><a class="card-options-remove" href="#" data-bs-toggle="card-remove"><i class="fe fe-x"></i></a></div>
@@ -150,12 +180,12 @@ require_once('../components/header.php');
               <div class="col-md-5">
                           <div class="mb-3">
                             <label class="form-label">Select Card Type</label>
-                            <select class="form-control btn-square">
+                            <select class="form-control btn-square" name="type">
                               <option value="0">--Select--</option>
-                              <option value="1">Visa</option>
-                              <option value="2">Master</option>
-                              <option value="3">American Express</option>
-                              <option value="4">Visa Prepaid</option>
+                              <option value="visa">Visa</option>
+                              <option value="master">Master Card</option>
+                              <option value="express">American Express</option>
+                              <option value="visa prepaid">Visa Prepaid</option>
                             </select>
                           </div>
                         </div>
@@ -164,7 +194,7 @@ require_once('../components/header.php');
                <div class="col-md-6">
                           <div class="mb-3">
                             <label class="form-label">Name On Card</label>
-                            <input class="form-control" type="text" placeholder="Specify the name on card">
+                            <input class="form-control" type="text" name="name" placeholder="Specify the name on card">
                           </div>
                         </div>
                        
@@ -172,7 +202,7 @@ require_once('../components/header.php');
               <div class="col-md-12">
                           <div>
                             <label class="form-label">Remark</label>
-                            <textarea class="form-control" rows="5" placeholder="Share any special preference with us here"></textarea>
+                            <textarea class="form-control" name="remark" rows="5" placeholder="Share any special preference with us here"></textarea>
                           </div>
                         </div>
               
@@ -184,7 +214,7 @@ require_once('../components/header.php');
                     </div>
                    
            <div class="card-footer text-end">
-                      <button class="btn btn-primary" type="submit">Request</button>
+                      <button class="btn btn-primary" name="submit" type="submit">Request</button>
                     </div>
             
                   </form>

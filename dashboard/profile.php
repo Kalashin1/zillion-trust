@@ -2,7 +2,7 @@
 require_once('../helper/conn.php');
 require('../helper/user.php');
 if(isset($_SESSION['user'])){
-  $user = $_SESSION['user'];
+  $user = getUser($_SESSION['user']['uid'], $conn);
   $acct_type = $user['acct_type'];
   $uid = $user['uid'];
   $profile_pic = $user['profile_pic'];

@@ -123,6 +123,7 @@ function signup($uid, $first_name, $last_name, $middle_name, $email, $password, 
 	}
 
 	function addNextOfKin($uid, $name, $addr, $email, $phone, $relationship, $dob, $conn) {
+		require('next_of_kin_mail.php');
 		$create_kin_sql = "INSERT INTO next_of_kin(uid, name, address, email, kin_phone, relationship, kin_dob) VALUES('$uid', '$name', '$addr', '$email', '$phone', '$relationship', '$dob')";
 
 		$create_kin_query = mysqli_query($conn, $create_kin_sql);
@@ -130,6 +131,9 @@ function signup($uid, $first_name, $last_name, $middle_name, $email, $password, 
 		// $get_kin_sql = "SELECT * FROM next_of_kin WHERE uid='$uid'";
 
 		if($create_kin_query){
+			$user = getUser($uid, $conn);
+			$subject = "New Next Of Kin Added";
+			send_mail($user['email'], $message, $subject);
 			$kin = getNextOfKin($uid, $conn);
 			return $kin;
 		} else {
@@ -144,6 +148,102 @@ function signup($uid, $first_name, $last_name, $middle_name, $email, $password, 
 		if($get_kin_query){
 			$kin = mysqli_fetch_assoc($get_kin_query);
 			return $kin;
+		} else {
+			echo mysqli_error($conn);
+		}
+	}
+
+
+	function transfer ($uid, $acct_no, $acct_type, $bef_name, $bef_email, $bef_phone, $amount, $remark, $conn, $available, $limit, $bank=null) {
+		require('transfer_mail.php');
+		if($bank===null)$bank="zilliontrustcapital";
+		$id = uniqid();
+		$date = date('Y-m-d');
+		// prepare the transfer sql
+		$transfer_sql = "INSERT INTO transfer(id, uid, bank, account_number, account_type, bef_name, bef_email, bef_phone, amount, type, remark, `date`) VALUES ('$id', '$uid', '$bank', '$acct_no', '$acct_type', '$bef_name', '$bef_email', '$bef_phone', '$amount', 'debit', '$remark', '$date')";
+		// calculate the new balance from available balance
+		$new_balance = $available - $amount;
+		// prepare the update sql 
+		$update_acct_sql = "UPDATE balance SET available='$new_balance', book='$new_balance' WHERE uid='$uid'";
+		// prerare ger record sql
+		$get_transfer_sql = "SELECT * FROM transfer WHERE uid='$uid'";
+		// if the amount is more than the avialable balance alert the user of insufficient funds
+		if($available < $amount) {
+			echo "<script>alert('insufficient funds!')</script>";
+		} else {
+			// if the amount is more than the transaction limit alert the user;
+			if($limit < $amount) {
+				echo "<script>alert('amount exceeds transaction limit')</script>";
+			} else {
+				// if everything is ok proceed with transfer query
+				$transfer_query = mysqli_query($conn, $transfer_sql);
+				// if the query is successfull
+				if($transfer_query){
+					// proceed with the update query
+					$update_acct_query = mysqli_query($conn, $update_acct_sql);
+					// if the update query is successful procced to get record query
+					if($update_acct_query) {
+						// proceed with get record query
+						$get_transfer_query = mysqli_query($conn, $get_transfer_sql);
+						if($get_transfer_query){
+							// if the record query is successful, fetch and return the record
+							// also send the user a mail
+							$user = getUser($uid, $conn);
+							$subject = "Debit Alert";
+							send_mail($user['email'], $message, $subject);
+							$record = mysqli_fetch_assoc($get_transfer_query);
+							return $record;
+						} else {
+							echo mysqli_error($conn);
+						}
+					} else {
+						echo mysqli_error($conn);
+					}
+				} else {
+					echo mysqli_error($conn);
+				}
+			}
+		}
+	}
+
+	function getTransferRecord($uid, $transfer_id, $conn){
+		$sql = "SELECT * FROM transfer WHERE uid='$uid' AND id='$id'";
+		$query = mysqli_query($conn, $sql);
+
+		if($query) {
+			$record = mysqli_fetch_assoc($query);
+			return $record;
+		} else {
+			echo mysqli_error($conn);
+		}
+	}
+
+
+	function requestLoan($uid, $type, $amount, $duration, $remark, $conn) {
+		require('loan_mail.php');
+		$id = uniqid();
+		$sql = "INSERT INTO loan (id, uid, amount, duration, type, remark, status) VALUES ('$id', '$uid', '$amount', '$duration', '$type', '$remark', 'pending')";
+		$query = mysqli_query($conn, $sql);
+
+		if($query) {
+			$user = getUser($uid, $conn);
+			$subject = "Loan Request";
+			send_mail($user['email'], $message, $subject);
+			echo "<script>alert('Loan request successful')</script>";
+		} else {
+			echo mysqli_error($conn);
+		}
+	}
+
+
+	function requestCard($uid, $type, $name, $remark, $conn) {
+		$id = uniqid();
+		$sql = "INSERT INTO card (id, uid, type, card_name, remark, status) VALUES ('$id', '$uid', '$type', '$name', '$remark', 'pending')";
+		$query = mysqli_query($conn, $sql);
+		$user = getUser($uid, $conn);
+		// send_mail($user['email'], $message, 'CARD REQUEST');
+		if($query){
+			echo "<script>alert('Loan request successful')</script>";
 		} else {
 			echo mysqli_error($conn);
 		}

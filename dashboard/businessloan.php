@@ -1,7 +1,9 @@
 <?php 
-session_start();
+require_once('../helper/conn.php');
+require('../helper/user.php');
 if(isset($_SESSION['user'])){
-  $user = $_SESSION['user'];
+  $user = getUser($_SESSION['user']['uid'], $conn);
+  $uid = $user['uid'];
   $acct_type = $user['acct_type'];
   $profile_pic = $user['profile_pic'];
   $acct_no = $user['acct_no'];
@@ -26,6 +28,31 @@ if(isset($_SESSION['user'])){
   $street = $user['street'];
   $dob = $user['dob'];
   $reg_date = $user['reg_date'];
+
+  if(isset($_POST['submit'])) {
+    $errors = [];
+    if(!empty($_POST['amount'])) {
+      $amount = htmlspecialchars($_POST['amount']);
+    } else {
+      $errors['amount'] = "Please provide the amount of your loan";
+    }
+
+    if(!empty($_POST['duration'])) {
+      $duration = htmlspecialchars($_POST['duration']);
+    } else {
+      $errors['duration'] = "Please provide the duration of your loan";
+    }
+
+    if(!empty($_POST['remark'])) {
+      $remark = htmlspecialchars($_POST['remark']);
+    } else {
+      $remark = "no remark";
+    }
+
+    if(empty($errors)) {
+      requestLoan($uid, 'business', $amount, $duration, $remark, $conn);
+    }
+  }
 
 } else {
   header('Location: ../user/login.php');
@@ -87,34 +114,34 @@ require_once('../components/header.php');
     <!-- tap on tap ends-->
     <!-- page-wrapper Start-->
     <div class="page-wrapper compact-wrapper" id="pageWrapper">
-		<!-- Page Header Start-->
-		
-		 <?php include '../components/navbar.php';?>
+    <!-- Page Header Start-->
+    
+     <?php include '../components/navbar.php';?>
 <!---->
       <!-- Page Header Ends -->
-		
-		
+    
+    
       <!-- Page Body Start-->
       <div class="page-body-wrapper">
-		  
-		  
+      
+      
         <!-- Page Sidebar Start-->
       <?php include '../components/sidebar.php';?>
-		  
+      
         <!-- Page Sidebar Ends-->
-		  
-		  
-		  
-		  
+      
+      
+      
+      
         <div class="page-body">
           <div class="container-fluid">  
-		  
+      
             <div class="page-title">
-				
-				
+        
+        
               <?php include('../components/trading_view.php') ?>
-				
-				
+        
+        
               <div class="row">
                 <div class="col-6">
                   <h3>INSTANT LOAN</h3>
@@ -139,7 +166,7 @@ require_once('../components/header.php');
           
           
                 <div class="col-xl-8">
-                  <form class="card">
+                  <form class="card"  action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST">
                     <div class="card-header">
                       <h4 class="card-title mb-0">Complete The Form Below To Request for A Loan</h4>
                       <div class="card-options"><a class="card-options-collapse" href="#" data-bs-toggle="card-collapse"><i class="fe fe-chevron-up"></i></a><a class="card-options-remove" href="#" data-bs-toggle="card-remove"><i class="fe fe-x"></i></a></div>
@@ -150,7 +177,7 @@ require_once('../components/header.php');
                          
               <div class="mb-3">
                             <label class="form-label">Amount</label>
-                            <input class="form-control" type="text" placeholder="Amount you need">
+                            <input class="form-control" type="number" name="amount" required placeholder="Amount you need">
                           </div>
               
                         </div>
@@ -158,7 +185,7 @@ require_once('../components/header.php');
                         <div class="col-md-6">
                           <div class="mb-3">
                             <label class="form-label">Duration</label>
-                            <input class="form-control" type="number" placeholder="Duration you need loan for e.g 30days, 90days">
+                            <input class="form-control" type="text" name="duration" required placeholder="Duration you need loan for e.g 30days, 90days">
                           </div>
                         </div>
               
@@ -166,7 +193,7 @@ require_once('../components/header.php');
               <div class="col-md-12">
                           <div>
                             <label class="form-label">Remark</label>
-                            <textarea class="form-control" rows="5" placeholder="Enter your remark here"></textarea>
+                            <textarea class="form-control" rows="5"  name="remark" required placeholder="Enter your remark here"></textarea>
                           </div>
                         </div>
               
@@ -178,7 +205,7 @@ require_once('../components/header.php');
                     </div>
                    
            <div class="card-footer text-end">
-                      <button class="btn btn-primary" type="submit">Request</button>
+                      <button class="btn btn-primary" name="submit" type="submit">Request</button>
                     </div>
             
                   </form>
@@ -192,7 +219,7 @@ require_once('../components/header.php');
         </div>
         <!-- footer start-->
         <?php include '../components/dashboard-footer.php';?>
-		  <!-- footer start-->
+      <!-- footer start-->
       </div>
     </div>
 
