@@ -34,7 +34,7 @@ function signup($uid, $first_name, $last_name, $middle_name, $email, $password, 
 			if($get_user_query) {
 				$user = mysqli_fetch_assoc($get_user_query);
 				$_SESSION['user'] = $user;
-				$subject = "account opening";
+				$subject = "Account opening";
 				// inform the user that their account has been created
 				send_mail($email, $message, $subject);
 				// redirect them to the dashboard
@@ -119,6 +119,33 @@ function signup($uid, $first_name, $last_name, $middle_name, $email, $password, 
 			// print_r($user);
 			} else {
 				echo mysqli_error($conn);
+		}
+	}
+
+	function addNextOfKin($uid, $name, $addr, $email, $phone, $relationship, $dob, $conn) {
+		$create_kin_sql = "INSERT INTO next_of_kin(uid, name, address, email, kin_phone, relationship, kin_dob) VALUES('$uid', '$name', '$addr', '$email', '$phone', '$relationship', '$dob')";
+
+		$create_kin_query = mysqli_query($conn, $create_kin_sql);
+
+		// $get_kin_sql = "SELECT * FROM next_of_kin WHERE uid='$uid'";
+
+		if($create_kin_query){
+			$kin = getNextOfKin($uid, $conn);
+			return $kin;
+		} else {
+			echo mysqli_error($conn);
+		}
+	}
+
+	function getNextOfKin($uid, $conn) {
+		$get_kin_sql = "SELECT * FROM next_of_kin WHERE uid='$uid'";
+		$get_kin_query = mysqli_query($conn, $get_kin_sql);
+
+		if($get_kin_query){
+			$kin = mysqli_fetch_assoc($get_kin_query);
+			return $kin;
+		} else {
+			echo mysqli_error($conn);
 		}
 	}
 

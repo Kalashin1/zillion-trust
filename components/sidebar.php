@@ -93,7 +93,7 @@
                     </ul>
                   </li>
 					
-                  <li class="sidebar-list"><a class="sidebar-link sidebar-title" href="#"><i data-feather="power"></i><span>Log Out</span></a>
+                  <li class="sidebar-list"><a class="sidebar-link sidebar-title" href="logout.php"><i data-feather="power"></i><span>Log Out</span></a>
                     
                   </li>
 					

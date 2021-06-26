@@ -1,8 +1,10 @@
-<?php 
-session_start();
+<?php
+require_once('../helper/conn.php');
+require('../helper/user.php');
 if(isset($_SESSION['user'])){
   $user = $_SESSION['user'];
   $acct_type = $user['acct_type'];
+  $uid = $user['uid'];
   $profile_pic = $user['profile_pic'];
   $acct_no = $user['acct_no'];
   $book = $user['book'];
@@ -13,24 +15,87 @@ if(isset($_SESSION['user'])){
   $uncleared = $user['uncleared'];
   $status = $user['status'];
   $name = $user['first_name'] ." ". $user['middle_name']. " ". $user['last_name']; 
-  $firt_name = $user['first_name'];
+  $first_name = $user['first_name'];
   $middle_name = $user['middle_name'];
   $last_name = $user['last_name'];
-  $userame = $user['username'];
+  $username = $user['username'];
   $email = $user['email'];
   $country = $user['country'];
-  $state = $user['user'];
+  $state = $user['state'];
   $city = $user['city'];
-  $zip = $user['zip'];
+  $zip = $user['zip_code'];
   $phone = $user['phone'];
   $street = $user['street'];
+  $phone = $user['phone'];
   $dob = $user['dob'];
   $reg_date = $user['reg_date'];
+
+  if(isset($_POST['kin_submit'])){
+    $errors = [];
+    if(!empty($_POST['kin_name'])){
+      $name = htmlspecialchars($_POST['kin_name']);
+    } else {
+      $errors['name'] = "Please enter a name";
+    }
+
+    if(!empty($_POST['kin_email'])){
+      $email = htmlspecialchars($_POST['kin_email']);
+    } else {
+      $errors['email'] = "Please enter an email";
+    }
+
+    if(!empty($_POST['kin_address'])) {
+      $address = htmlspecialchars($_POST['kin_address']);
+    } else {
+      $errors['address'] = "Please enter an address";
+    }
+
+    if(!empty($_POST['kin_phone'])) {
+      $phone = htmlspecialchars($_POST['kin_phone']);
+    } else {
+      $errors['phone'] = "Please enter a phone number";
+    }
+
+    if(!empty($_POST['relationship'])) {
+      $relationship = htmlspecialchars($_POST['relationship']);
+    } else {
+      $errors['relationship'] = "Please enter your relationship with next of kin";
+    }
+
+    if(!empty($_POST['kin_dob'])) {
+      $dob = htmlspecialchars($_POST['kin_dob']);
+    } else {
+      $errors['kin_dob'] = "Please enter the date of birth of next of kin";
+    }
+
+    if(empty($errors)) {
+      // echo "$name $email $address $phone $relationship $dob $uid";
+      $kin = addNextOfKin($uid, $name, $address, $email, $phone, $relationship, $dob, $conn);
+      print_r($kin);
+      $kin_name = $kin['name'];
+      $kin_email = $kin['email'];
+      $kin_addr = $kin['address'];
+      $kin_phone = $kin['kin_phone'];
+      $kin_relationship = $kin['relationship'];
+      $kin_dob = $kin['kin_dob'];
+    } else {
+      echo $errors;
+    }
+  }
+
+  $kin = getNextOfKin($uid, $conn);
+  $kin_name = $kin['name'];
+  $kin_email = $kin['email'];
+  $kin_addr = $kin['address'];
+  $kin_phone = $kin['kin_phone'];
+  $kin_relationship = $kin['relationship'];
+  $kin_dob = $kin['kin_dob'];
+
+
 } else {
-  header('Location: user/login.php');
+  header('Location: ../user/login.php');
 }
-require_once('../helper/conn.php');
-require_once('../components/header.php');
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -156,45 +221,57 @@ require_once('../components/header.php');
                           <input class="form-control" readonly value="<?php echo $email ?>">
                         </div>
                         <div class="mb-3">
-                          <label class="form-label">Password</label>
-                          <input class="form-control" type="password" value="password">
+                          <label class="form-label">Phone Number</label>
+                          <input class="form-control" type="text" readonly value="<?php echo $phone ?>">
                         </div>
                        
-                        <div class="form-footer">
+                        <!-- <div class="form-footer">
                           <button class="btn btn-primary btn-block">Save</button>
-                        </div>
+                        </div> -->
 						  
                       </form>
 						
 						<hr>
 						
-						<form>							
+						<form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST">							
 							<br>
 							
 						 <h4 class="card-title mb-0">NEXT OF KIN</h4>	
                        <p> 
-							<div class="mb-3">
+          							<div class="mb-3">
                           <label class="form-label">Full Name</label>
-                          <input class="form-control">
+                          <input class="form-control" name="kin_name" type="text" placeholder="Enter name of next of kin" value="<?php echo $kin_name ?>">
                         </div>
                         
-						<div class="mb-3">
+            						<div class="mb-3">
                           <label class="form-label">Address</label>
-                          <input class="form-control">
+                          <input class="form-control" name="kin_address" type="text" placeholder="Enter address of next of kin" value="<?php echo $kin_addr ?>">
                         </div>
 							
-						<div class="mb-3">
-                          <label class="form-label"></label>
-                          <input class="form-control" placeholder="Enter next of kin Email">
+            						<div class="mb-3">
+                          <label class="form-label">Email</label>
+                          <input class="form-control" type="email" name="kin_email" placeholder="Enter next of kin Email" value="<?php echo $kin_email ?>">
                         </div>
 							
-						<div class="mb-3">
+            						<div class="mb-3">
                           <label class="form-label">Phone</label>
-                          <input class="form-control" />
+                          <input class="form-control" name="kin_phone" type="text" placeholder="Enter phone number of next of kin" value="<?php echo $kin_phone ?>">
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label">Relationship with next of kin</label>
+                          <input class="form-control" name="relationship" type="text" placeholder="Enter relationship with next of kin" value="<?php echo $kin_relationship ?>">
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="col-form-label" cursorshover="true">Dob</label>
+                          <div class="col-sm-12">
+                            <input class="form-control digits" name="kin_dob" type="date" data-bs-original-title="" title="" cursorshover="true" placeholder="Enter date of birth of next of kin" value="<?php echo $kin_dob ?>">
+                          </div>
                         </div>
                        
                         <div class="form-footer">
-                          <button class="btn btn-primary btn-block">Save</button>
+                          <button class="btn btn-primary btn-block" type="submit" name="kin_submit">Save</button>
                         </div>
 						  </p>
                       </form>
@@ -219,7 +296,7 @@ require_once('../components/header.php');
                         <div class="col-md-3">
                           <div class="mb-3">
                             <label class="form-label">First Name</label>
-                            <input class="form-control" type="text" readonly value="<?php echo $user['first_name'] ?>">
+                            <input class="form-control" type="text" readonly value="<?php echo $first_name ?>">
                           </div>
                         </div>
                         <div class="col-sm-6 col-md-3">
@@ -267,13 +344,13 @@ require_once('../components/header.php');
                         <div class="col-sm-6 col-md-3">
                           <div class="mb-3">
                             <label class="form-label">Postal Code</label>
-                            <input class="form-control" type="number" readonly value="<?php echo $zip ?>">
+                            <input class="form-control" type="text" readonly value="<?php echo $zip ?>">
                           </div>
                         </div>
                         <div class="col-md-5">
                           <div class="mb-3">
                             <label class="form-label">Country</label>
-                            <input class="form-control" type="number" readonly value="<?php echo $country ?>">
+                            <input class="form-control" type="text" readonly value="<?php echo $country ?>">
                           </div>
                         </div>
                         <!-- <div class="col-md-12">

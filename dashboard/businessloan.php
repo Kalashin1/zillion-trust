@@ -13,6 +13,20 @@ if(isset($_SESSION['user'])){
   $uncleared = $user['uncleared'];
   $status = $user['status'];
   $name = $user['first_name'] ." ". $user['middle_name']. " ". $user['last_name']; 
+  $firt_name = $user['first_name'];
+  $middle_name = $user['middle_name'];
+  $last_name = $user['last_name'];
+  $userame = $user['username'];
+  $email = $user['email'];
+  $country = $user['country'];
+  $state = $user['state'];
+  $city = $user['city'];
+  $zip = $user['zip_code'];
+  $phone = $user['phone'];
+  $street = $user['street'];
+  $dob = $user['dob'];
+  $reg_date = $user['reg_date'];
+
 } else {
   header('Location: ../user/login.php');
 }
@@ -58,7 +72,7 @@ require_once('../components/header.php');
     <title><?php echo($name) ?> - Dashboard</title>
   </head>
 <body onload="startTime()">
-  <div class="loader-wrapper">
+    <div class="loader-wrapper">
       <div class="loader-index"><span></span></div>
       <svg>
         <defs></defs>
@@ -68,10 +82,11 @@ require_once('../components/header.php');
         </filter>
       </svg>
     </div>
+    <!-- tap on top starts-->
+    <div class="tap-top"><i data-feather="chevrons-up"></i></div>
     <!-- tap on tap ends-->
     <!-- page-wrapper Start-->
     <div class="page-wrapper compact-wrapper" id="pageWrapper">
-     
 		<!-- Page Header Start-->
 		
 		 <?php include '../components/navbar.php';?>
@@ -102,121 +117,77 @@ require_once('../components/header.php');
 				
               <div class="row">
                 <div class="col-6">
-                  <h3>Dashboard</h3>
+                  <h3>INSTANT LOAN</h3>
                 </div>
                 <div class="col-6">
                   <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="index.html"><i data-feather="home"></i></a></li>
-                    <li class="breadcrumb-item">Dashboard</li>
+                    <li class="breadcrumb-item">instant loan</li>
                    
                   </ol>
                 </div>
               </div>
             </div>
           </div>
-          <!-- Container-fluid starts-->
+         <!-- Container-fluid starts-->
           
-			
-			
-			<div class="container-fluid">
-			  
-			  
-			  
-			  
-            <div class="row second-chart-list third-news-update">
-             
-				 <div class="col-xl-4 col-lg-12 xl-50 morning-sec box-col-12">
-                <div class="card o-hidden profile-greeting">
-                  <div class="card-body">
-                    <div class="media">
-                      <div class="badge-groups w-100 px-2">
-                        <div class="badge f-12"><i class="me-1" data-feather="clock"></i><span id="txt"></span></div>
-                        <div class="badge f-12"><?php echo date('D d M') ?></div>
+      <div class="container-fluid">
+            <div class="edit-profile">
+              <div class="row">
+               
+          
+          
+          
+                <div class="col-xl-8">
+                  <form class="card">
+                    <div class="card-header">
+                      <h4 class="card-title mb-0">Complete The Form Below To Request for A Loan</h4>
+                      <div class="card-options"><a class="card-options-collapse" href="#" data-bs-toggle="card-collapse"><i class="fe fe-chevron-up"></i></a><a class="card-options-remove" href="#" data-bs-toggle="card-remove"><i class="fe fe-x"></i></a></div>
+                    </div>
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col-md-6">
+                         
+              <div class="mb-3">
+                            <label class="form-label">Amount</label>
+                            <input class="form-control" type="text" placeholder="Amount you need">
+                          </div>
+              
+                        </div>
+              
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Duration</label>
+                            <input class="form-control" type="number" placeholder="Duration you need loan for e.g 30days, 90days">
+                          </div>
+                        </div>
+              
+              
+              <div class="col-md-12">
+                          <div>
+                            <label class="form-label">Remark</label>
+                            <textarea class="form-control" rows="5" placeholder="Enter your remark here"></textarea>
+                          </div>
+                        </div>
+              
+              
+                       
+                       
+                       
                       </div>
                     </div>
-                    <div class="greeting-user text-center">
-                      <div class="profile-vector"><img class="img-fluid" src="../user/upload/<?php echo $profile_pic ?>" style="height: 110px; border-raduis: 50% !important; width: 200px; object-fit: contain;" alt=""></div>
-                      <h4 class="f-w-600"><span id="greeting">Good Morning</span> <span class="right-circle"><i class="fa fa-check-circle f-14 middle"></i></span></h4>
-                      <p><span> Today's earrning is $405 & your sales increase rate is 3.7 over the last 24 hours</span></p>
-                      <div class="whatsnew-btn"><a class="btn btn-primary">Whats New !</a></div>
-                      <div class="left-icon"><i class="fa fa-bell"> </i></div>
+                   
+           <div class="card-footer text-end">
+                      <button class="btn btn-primary" type="submit">Request</button>
                     </div>
-                  </div>
+            
+                  </form>
                 </div>
               </div>
-				
-
-              <div class="col-sm-3 sm-50 chart_data_right box-col-12">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="media align-items-center">
-                      <div class="media-body right-chart-content">
-                        <h4><?php echo $book ?><span class="new-box"><?php echo $status ?></span></h4><span>Book Balance</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-				  
-				  
-				   <div class="card">
-                  <div class="card-body">
-                    <div class="media align-items-center">
-                      <div class="media-body right-chart-content">
-                        <h4><?php echo $loan ?><span class="new-box"><?php echo $status ?></span></h4><span>Loan Balance</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-				  
-				   <div class="card">
-                  <div class="card-body">
-                    <div class="media align-items-center">
-                      <div class="media-body right-chart-content">
-                        <h4><?php echo $fixed ?><span class="new-box"><?php echo $status ?></span></h4><span>Fixed Deposit</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-				  
-				  
-				  
-              </div>
-				
-				 <div class="col-sm-3 sm-50 chart_data_right box-col-12">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="media align-items-center">
-                      <div class="media-body right-chart-content">
-                        <h4><?php echo $available ?><span class="new-box"><?php echo $status ?></span></h4><span>Available Balance</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-					 
-			 <div class="card">
-                  <div class="card-body">
-                    <div class="media align-items-center">
-                      <div class="media-body right-chart-content">
-                        <h4><?php echo $uncleared ?><span class="new-box"><?php echo $status ?></span></h4><span>Uncleared Balance</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-					 
-				 <div class="card">
-                  <div class="card-body">
-                    <div class="media align-items-center">
-                      <div class="media-body right-chart-content">
-                        <h4><?php echo $limit ?><span class="new-box"><?php echo $status ?></span></h4><span>Limits</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>	 
-					 
-					 
-              </div>				
             </div>
           </div>
+      
+      
           <!-- Container-fluid Ends-->
         </div>
         <!-- footer start-->
