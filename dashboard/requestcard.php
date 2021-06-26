@@ -119,7 +119,7 @@ require_once('../components/header.php');
     <div class="page-wrapper compact-wrapper" id="pageWrapper">
 		<!-- Page Header Start-->
 		
-		 <!-- <?php include '../components/navbar.php';?> -->
+		  <?php include '../components/navbar.php';?>
 <!---->
       <!-- Page Header Ends -->
 		
@@ -129,7 +129,7 @@ require_once('../components/header.php');
 		  
 		  
         <!-- Page Sidebar Start-->
-      <!-- <?php include '../components/sidebar.php';?> -->
+       <?php include '../components/sidebar.php';?> 
 		  
         <!-- Page Sidebar Ends-->
 		  

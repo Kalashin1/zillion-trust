@@ -1,7 +1,9 @@
 <?php 
-session_start();
+require_once('../helper/conn.php');
+require('../helper/user.php');
 if(isset($_SESSION['user'])){
-  $user = $_SESSION['user'];
+  $user = getUser($_SESSION['user']['uid'], $conn);
+  $uid = $user['uid'];
   $acct_type = $user['acct_type'];
   $profile_pic = $user['profile_pic'];
   $acct_no = $user['acct_no'];
@@ -26,6 +28,9 @@ if(isset($_SESSION['user'])){
   $street = $user['street'];
   $dob = $user['dob'];
   $reg_date = $user['reg_date'];
+
+
+  $records = getUserTransfers($uid, $conn);
 
 } else {
   header('Location: ../user/login.php');
@@ -152,15 +157,26 @@ require_once('../components/header.php');
                           </tr>
                         </thead>
                         <tbody>
+                          <?php foreach ($records as $record) { ?>
+                            <tr>
+                              <td><a class="text-inherit" href="#"><?php $date = $record['date'];
+                              echo $date;
+                               ?></a></td>
+                              <td><?php $remark = $record['remark'];echo $remark ?></td>
+                              <td><?php if($record['type']=='debit'){$amount = $record['amount']; echo $amount;} ?></td>
+                              <td><?php if($record['type']=='credit'){echo 0.0; } ?></td>
+                              <td><?php echo $record['available']; ?></td>
+                            </tr>
+                          <?php } ?>
                           
-              <tr>
+             <!--  <tr>
                             <td><a class="text-inherit" href="#">Untrammelled prevents </a></td>
                             <td>28 May 2018</td>
                             <td><span class="status-icon bg-success"></span> $0</td>
                             <td>$56,908</td>
               <td>$56,908</td>  
                            
-                          </tr>
+                          </tr> -->
               
                           
               

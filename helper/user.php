@@ -249,4 +249,16 @@ function signup($uid, $first_name, $last_name, $middle_name, $email, $password, 
 		}
 	}
 
+	function getUserTransfers($uid, $conn){
+		$sql = "SELECT transfer.date, transfer.type, transfer.remark, transfer.amount, transfer.date, balance.available FROM transfer INNER JOIN balance ON transfer.uid=balance.uid WHERE transfer.uid='$uid'";
+		$query = mysqli_query($conn, $sql);
+
+		if($query){
+			$records = mysqli_fetch_all($query, MYSQLI_ASSOC);;
+			return $records;
+		} else {
+			echo mysqli_error($conn);
+		}
+	}
+
  ?>
