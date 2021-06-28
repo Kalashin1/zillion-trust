@@ -210,8 +210,8 @@ if(isset($_SESSION['user'])){
                           <div class="profile-title">
                             <div class="media">                        <img class="rounded-circle" alt="" style="object-fit: cover; width: 80px;" src="../user/upload/<?php echo $profile_pic ?>">
                               <div class="media-body">
-                                <h5 class="mb-1">MARK JECNO</h5>
-                                <p>ACCOUNT NUMBER</p>
+                                <h5 class="mb-1"><?php echo $name ?></h5>
+                                <p><?php echo $acct_no ?></p>
                               </div>
                             </div>
                           </div>
@@ -271,7 +271,11 @@ if(isset($_SESSION['user'])){
                         </div>
                        
                         <div class="form-footer">
-                          <button class="btn btn-primary btn-block" type="submit" name="kin_submit">Save</button>
+                          <?php if(!isset($kin_name)) { ?>
+                            <button  class="btn btn-primary btn-block" type="submit" name="kin_submit">
+                              Save
+                            </button>
+                          <?php }?>
                         </div>
 						  </p>
                       </form>

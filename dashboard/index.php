@@ -1,7 +1,9 @@
 <?php 
-session_start();
+require_once('../helper/conn.php');
+require('../helper/user.php');
 if(isset($_SESSION['user'])){
-  $user = $_SESSION['user'];
+  $user = getUser($_SESSION['user']['uid'], $conn);
+  $uid = $user['uid'];
   $acct_type = $user['acct_type'];
   $profile_pic = $user['profile_pic'];
   $acct_no = $user['acct_no'];
@@ -12,7 +14,17 @@ if(isset($_SESSION['user'])){
   $limit = $user['limit'];
   $uncleared = $user['uncleared'];
   $status = $user['status'];
-  $name = $user['first_name'] ." ". $user['middle_name']. " ". $user['last_name']; 
+  $name = $user['first_name'] ." ". $user['middle_name']. " ". $user['last_name'];
+  $login_date = $_SESSION['user']['login_date'];
+  $date = date('Y-m-d: H:i:s');
+
+  $update_date_sql = "UPDATE auth SET last_login_date='$date' WHERE uid='$uid'";
+
+  $update_date_query = mysqli_query($conn, $update_date_sql);
+  if($update_date_query) {
+    echo "<script>alert('last login date updated successfully $date, previous login date was $login_date')</script>";
+  }
+  
 } else {
   header('Location: ../user/login.php');
 }
@@ -129,16 +141,16 @@ require_once('../components/header.php');
                 <div class="card o-hidden profile-greeting">
                   <div class="card-body">
                     <div class="media">
-                      <div class="badge-groups w-100 px-2">
+                      <div class="badge-groups w-100 mr-2">
                         <div class="badge f-12"><i class="me-1" data-feather="clock"></i><span id="txt"></span></div>
-                        <div class="badge f-12"><?php echo date('D d M') ?></div>
+                        <div style="position: relative; left: -2rem" class="badge f-12"><?php echo date('D d M') ?></div>
                       </div>
                     </div>
                     <div class="greeting-user text-center">
                       <div class="profile-vector"><img class="img-fluid" src="../user/upload/<?php echo $profile_pic ?>" style="height: 110px; border-raduis: 50% !important; width: 200px; object-fit: contain;" alt=""></div>
                       <h4 class="f-w-600"><span id="greeting">Good Morning</span> <span class="right-circle"><i class="fa fa-check-circle f-14 middle"></i></span></h4>
-                      <p><span> Today's earrning is $405 & your sales increase rate is 3.7 over the last 24 hours</span></p>
-                      <div class="whatsnew-btn"><a class="btn btn-primary">Whats New !</a></div>
+                      <p><span id="location"></span></p>
+                      <div class="whatsnew-btn"><a class="btn btn-primary"><?php echo "Your last login date was $login_date"; ?></a></div>
                       <div class="left-icon"><i class="fa fa-bell"> </i></div>
                     </div>
                   </div>
@@ -151,7 +163,9 @@ require_once('../components/header.php');
                   <div class="card-body">
                     <div class="media align-items-center">
                       <div class="media-body right-chart-content">
-                        <h4><?php echo $book ?><span class="new-box"><?php echo $status ?></span></h4><span>Book Balance</span>
+                        <h4><?php echo $book ?></h4>
+                        <br /><div class="new-box bg-primary p-1"><?php echo $status ?></div>
+                        <span>Book Balance</span>
                       </div>
                     </div>
                   </div>
@@ -162,7 +176,9 @@ require_once('../components/header.php');
                   <div class="card-body">
                     <div class="media align-items-center">
                       <div class="media-body right-chart-content">
-                        <h4><?php echo $loan ?><span class="new-box"><?php echo $status ?></span></h4><span>Loan Balance</span>
+                        <h4><?php echo $loan ?></h4>
+                        <br /><div class="new-box bg-primary p-1"><?php echo $status ?></div>
+                        <span>Loan Balance</span>
                       </div>
                     </div>
                   </div>
@@ -172,7 +188,9 @@ require_once('../components/header.php');
                   <div class="card-body">
                     <div class="media align-items-center">
                       <div class="media-body right-chart-content">
-                        <h4><?php echo $fixed ?><span class="new-box"><?php echo $status ?></span></h4><span>Fixed Deposit</span>
+                        <h4><?php echo $fixed ?></h4>
+                        <br /><div class="new-box bg-primary p-1"><?php echo $status ?></div>
+                        <span>Fixed Deposit</span>
                       </div>
                     </div>
                   </div>
@@ -187,7 +205,9 @@ require_once('../components/header.php');
                   <div class="card-body">
                     <div class="media align-items-center">
                       <div class="media-body right-chart-content">
-                        <h4><?php echo $available ?><span class="new-box"><?php echo $status ?></span></h4><span>Available Balance</span>
+                        <h4><?php echo $available ?></h4>
+                        <br /><div class="new-box bg-primary p-1"><?php echo $status ?></div>
+                        <span>Available Balance</span>
                       </div>
                     </div>
                   </div>
@@ -197,7 +217,9 @@ require_once('../components/header.php');
                   <div class="card-body">
                     <div class="media align-items-center">
                       <div class="media-body right-chart-content">
-                        <h4><?php echo $uncleared ?><span class="new-box"><?php echo $status ?></span></h4><span>Uncleared Balance</span>
+                        <h4><?php echo $uncleared ?></h4>
+                        <br /><div class="new-box bg-primary p-1"><?php echo $status ?></div>
+                        <span>Uncleared Balance</span>
                       </div>
                     </div>
                   </div>
@@ -207,7 +229,9 @@ require_once('../components/header.php');
                   <div class="card-body">
                     <div class="media align-items-center">
                       <div class="media-body right-chart-content">
-                        <h4><?php echo $limit ?><span class="new-box"><?php echo $status ?></span></h4><span>Limits</span>
+                        <h4><?php echo $limit ?></h4>
+                        <br /><div class="new-box bg-primary p-1"><?php echo $status ?></div>
+                        <span>Limits</span>
                       </div>
                     </div>
                   </div>
@@ -261,6 +285,28 @@ require_once('../components/header.php');
     <!-- Plugins JS Ends-->
     <!-- Theme js-->
     <script src="../assets/js/script.js"></script>
+    <script>
+      var x = document.getElementById("location");
+      function getLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(successfulLookup);
+        } else {
+          x.innerHTML = "Geolocation is not supported by this browser.";
+        }
+      }
+
+  const successfulLookup = async (position) => {
+    const { latitude, longitude } = position.coords;
+    const res = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=adbf51e9bcbc4d2d8b73c3668fecabed`)
+    const data = await res.json();
+    console.log(data);
+    data.results.forEach(obj => {
+        x.innerHTML = `Your current location is ${obj.components.state}, ${obj.components.country}`
+      })
+    } // Or do whatever you want with the result
+
+      getLocation()
+    </script>
 <!--    <script src="../assets/js/theme-customizer/customizer.js"></script>-->
     <!-- login js-->
     <!-- Plugin used-->

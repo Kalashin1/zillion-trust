@@ -175,7 +175,7 @@ require_once('../components/header.php');
             <div class="page-title">
 				
 				
-              <?php include('../components/trading_view.php') ?>
+              <?php include('../components/trading_view.php') ?> 
 				
 				
               <div class="row">
@@ -201,7 +201,7 @@ require_once('../components/header.php');
           
           
           
-                <div class="col-xl-8">
+                <div class="col-xl-12">
                   <form class="card" action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST">
                     <div class="card-header">
                       <h4 class="card-title mb-0">Provide Details of Beneficiary Below</h4>

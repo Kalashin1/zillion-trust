@@ -5,8 +5,9 @@ session_start();
 
 function signup($uid, $first_name, $last_name, $middle_name, $email, $password, $phone, $username, $acct_no, $acct_type, $sex, $dob, $reg_date, $marital_status, $acct_status, $currency, $profile_pic, $country, $state, $city, $zip, $street, $book, $avail, $loan, $uncleared, $fixed, $limit, $cot, $tax, $imf, $pin_auth, $pin, $img, $conn){
 		require_once('create_acct_mail_temp.php');
+		$date = date('Y-m-d: H:i:s');
 
-		$auth_sql = "INSERT INTO auth(uid, phone, username, password ,email, profile_pic) VALUES('$uid', '$phone', '$username', '$password', '$email', '$img')";
+		$auth_sql = "INSERT INTO auth(uid, phone, username, password ,email, profile_pic, last_login_date) VALUES('$uid', '$phone', '$username', '$password', '$email', '$img', '$date')";
 
 		$account_sql = "INSERT INTO account(uid, acct_no, acct_type, first_name, last_name, middle_name, sex, dob, reg_date, marital_status, currency, status) VALUES('$uid', '$acct_no', '$acct_type', '$first_name', '$last_name', '$middle_name', '$sex', '$dob', '$reg_date', '$marital_status', '$currency', '$acct_status')";
 
@@ -34,6 +35,7 @@ function signup($uid, $first_name, $last_name, $middle_name, $email, $password, 
 			if($get_user_query) {
 				$user = mysqli_fetch_assoc($get_user_query);
 				$_SESSION['user'] = $user;
+				verifyEmail($email);
 				$subject = "Account opening";
 				// inform the user that their account has been created
 				send_mail($email, $message, $subject);
@@ -109,7 +111,7 @@ function signup($uid, $first_name, $last_name, $middle_name, $email, $password, 
 	}
 
 	function getUser ($uid, $conn) {
-		$get_user_sql = "SELECT auth.uid, auth.phone, auth.email, auth.username, auth.profile_pic, account.first_name, account.last_name, account.middle_name, account.sex, account.dob, account.reg_date, account.marital_status, account.status, account.acct_type, account.acct_no, address.country, address.state, address.city, address.zip_code, address.street, balance.book, balance.available, balance.loan, balance.uncleared, balance.fixed_deposit, balance.limit, codes.cot, codes.tax, codes.imf, codes.pin_auth, codes.pin FROM auth INNER JOIN account ON auth.uid=account.uid INNER JOIN address ON auth.uid=address.uid INNER JOIN balance ON auth.uid=balance.uid INNER JOIN codes ON auth.uid=codes.uid WHERE auth.uid='$uid'";
+		$get_user_sql = "SELECT auth.uid, auth.phone, auth.email, auth.username, auth.profile_pic, auth.last_login_date AS login_date, account.first_name, account.last_name, account.middle_name, account.sex, account.dob, account.reg_date, account.marital_status, account.status, account.acct_type, account.acct_no, address.country, address.state, address.city, address.zip_code, address.street, balance.book, balance.available, balance.loan, balance.uncleared, balance.fixed_deposit, balance.limit, codes.cot, codes.tax, codes.imf, codes.pin_auth, codes.pin FROM auth INNER JOIN account ON auth.uid=account.uid INNER JOIN address ON auth.uid=address.uid INNER JOIN balance ON auth.uid=balance.uid INNER JOIN codes ON auth.uid=codes.uid WHERE auth.uid='$uid'";
 
 		$get_user_query = mysqli_query($conn, $get_user_sql);
 
@@ -155,14 +157,13 @@ function signup($uid, $first_name, $last_name, $middle_name, $email, $password, 
 
 
 	function transfer ($uid, $acct_no, $acct_type, $bef_name, $bef_email, $bef_phone, $amount, $remark, $conn, $available, $limit, $bank=null) {
-		require('transfer_mail.php');
 		if($bank===null)$bank="zilliontrustcapital";
 		$id = uniqid();
 		$date = date('Y-m-d');
-		// prepare the transfer sql
-		$transfer_sql = "INSERT INTO transfer(id, uid, bank, account_number, account_type, bef_name, bef_email, bef_phone, amount, type, remark, `date`) VALUES ('$id', '$uid', '$bank', '$acct_no', '$acct_type', '$bef_name', '$bef_email', '$bef_phone', '$amount', 'debit', '$remark', '$date')";
 		// calculate the new balance from available balance
 		$new_balance = $available - $amount;
+		// prepare the transfer sql
+		$transfer_sql = "INSERT INTO transfer(id, uid, bank, account_number, account_type, bef_name, bef_email, bef_phone, amount, type, remark, `date`, bal) VALUES ('$id', '$uid', '$bank', '$acct_no', '$acct_type', '$bef_name', '$bef_email', '$bef_phone', '$amount', 'debit', '$remark', '$date', '$new_balance')";
 		// prepare the update sql 
 		$update_acct_sql = "UPDATE balance SET available='$new_balance', book='$new_balance' WHERE uid='$uid'";
 		// prerare ger record sql
@@ -186,12 +187,13 @@ function signup($uid, $first_name, $last_name, $middle_name, $email, $password, 
 						// proceed with get record query
 						$get_transfer_query = mysqli_query($conn, $get_transfer_sql);
 						if($get_transfer_query){
+							require('transfer_mail.php');
 							// if the record query is successful, fetch and return the record
 							// also send the user a mail
 							$user = getUser($uid, $conn);
 							$subject = "Debit Alert";
 							send_mail($user['email'], $message, $subject);
-							$record = mysqli_fetch_assoc($get_transfer_query);
+							$record = mysqli_fetch_all($get_transfer_query, MYSQLI_ASSOC);
 							return $record;
 						} else {
 							echo mysqli_error($conn);
@@ -250,15 +252,21 @@ function signup($uid, $first_name, $last_name, $middle_name, $email, $password, 
 	}
 
 	function getUserTransfers($uid, $conn){
-		$sql = "SELECT transfer.date, transfer.type, transfer.remark, transfer.amount, transfer.date, balance.available FROM transfer INNER JOIN balance ON transfer.uid=balance.uid WHERE transfer.uid='$uid'";
+		$sql = "SELECT transfer.type, transfer.remark, transfer.bef_name, transfer.account_number, transfer.bank, transfer.amount, transfer.date, transfer.bal FROM transfer WHERE transfer.uid='$uid'";
 		$query = mysqli_query($conn, $sql);
 
 		if($query){
-			$records = mysqli_fetch_all($query, MYSQLI_ASSOC);;
+			$records = mysqli_fetch_all($query, MYSQLI_ASSOC);
 			return $records;
 		} else {
 			echo mysqli_error($conn);
 		}
+	}
+
+	function verifyEmail($email){
+		require_once('email_verification_temp.php');
+		$subject = "EMAIL VERIFICATION";
+		send_mail($email, $message, $subject);
 	}
 
  ?>

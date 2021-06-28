@@ -166,7 +166,7 @@ require_once('../components/header.php');
           
           
                 <div class="col-xl-8">
-                  <form class="card"  action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST">
+                  <form class="card" action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST">
                     <div class="card-header">
                       <h4 class="card-title mb-0">Complete The Form Below To Request for A Loan</h4>
                       <div class="card-options"><a class="card-options-collapse" href="#" data-bs-toggle="card-collapse"><i class="fe fe-chevron-up"></i></a><a class="card-options-remove" href="#" data-bs-toggle="card-remove"><i class="fe fe-x"></i></a></div>

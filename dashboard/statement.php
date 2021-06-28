@@ -162,10 +162,10 @@ require_once('../components/header.php');
                               <td><a class="text-inherit" href="#"><?php $date = $record['date'];
                               echo $date;
                                ?></a></td>
-                              <td><?php $remark = $record['remark'];echo $remark ?></td>
+                              <td><?php $remark = $record['remark'];echo $remark."\n".$record['bank']. " Bank ".$record['account_number']." ".$record['bef_name']; ?></td>
                               <td><?php if($record['type']=='debit'){$amount = $record['amount']; echo $amount;} ?></td>
                               <td><?php if($record['type']=='credit'){echo 0.0; } ?></td>
-                              <td><?php echo $record['available']; ?></td>
+                              <td><?php echo $record['bal']; ?></td>
                             </tr>
                           <?php } ?>
                           
